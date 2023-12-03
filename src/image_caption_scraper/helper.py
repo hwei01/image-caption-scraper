@@ -6,7 +6,7 @@ from loguru import logger
 import base64
 
 
-def read_http(url, engine, query, i):
+def read_http(url, engine, query, caption, i):
     # logger.info("Image is http")
     img_content = requests.get(url).content
     img_file = io.BytesIO(img_content)
@@ -15,19 +15,28 @@ def read_http(url, engine, query, i):
         img = img.convert('RGB')
     except:
         pass
-    file_path = os.path.join(f'{engine}/{query}/{i}.jpg')
-    with open(file_path, 'wb') as f:
+    image_file_path = os.path.join(f'{i}.image')
+    with open(image_file_path, 'wb') as f:
         img.save(f, "JPEG", quality=95)
-        logger.info(f"Saved image {i}")
-
-def read_base64(url, engine, query, i):
+    
+    caption_file_path = os.path.join(f'{i}.caption')
+    with open(caption_file_path, "w") as write_file:
+        write_file.write(caption)
+ 
+    logger.info(f"Saved image {i}")
+def read_base64(url, engine, query, caption, i):
     # logger.info("Image is base64")
     base64_img = url.split(',')[1]
     img = Image.open(io.BytesIO(base64.b64decode(base64_img)))
     img = img.convert("RGB")
-    file_path = os.path.join(f'{engine}/{query}/{i}.jpg')
-    with open(file_path, "wb") as f:
+    image_file_path = os.path.join(f'{i}.image')
+    with open(image_file_path, "wb") as f:
         img.save(f, "JPEG", quality=95)
+   
+    caption_file_path = os.path.join(f'{filename}.caption') 
+    with open(caption_file_path, "w") as write_file:
+        write_file.write(caption)
+ 
     logger.info(f"Saved image {i}")
 
 class parse_args():

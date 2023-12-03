@@ -18,9 +18,14 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 
 # print(uuid.uuid4())
+def get_public_ip_address():
+    """Read the public IP address of the host"""
+    response = requests.get('https://api.ipify.org')
+    return response.text
+
 
 class Image_Caption_Scraper():
-
+    public_ip = get_public_ip_address()
     def __init__(self,engine="all",num_images=100,query="dog chases cat",out_dir="images",headless=True,driver="chromedriver",expand=False,k=3):
         """Initialization is only starting the web driver and getting the public IP address"""
         logger.info("Initializing scraper")
@@ -30,11 +35,9 @@ class Image_Caption_Scraper():
 
         self.cfg = parse_args(engine,num_images,query,out_dir,headless,driver,expand,k)
         self.start_web_driver()
-
-    def get_public_ip_address(self):
-        """Read the public IP address of the host"""
-        response = requests.get('https://api.ipify.org')
-        return response.text
+    
+    def close(self):
+        self.wd.close()
 
     def start_web_driver(self):
         """Create the webdriver and point it to the specific search engine"""
@@ -328,12 +331,13 @@ class Image_Caption_Scraper():
         for i,(key,val) in enumerate(img_data.items()):
             try:
                 url = val['url']
+                caption = val['caption']
 
                 if(url.startswith('http')):
-                    read_http(url,self.cfg.engine,query,i)
+                    read_http(url,self.cfg.engine,query,caption,i)
 
                 elif(url.startswith('data')):
-                    read_base64(url,self.cfg.engine,query,i)
+                    read_base64(url,self.cfg.engine,query,caption,i)
 
                 else:
                     del result_items[key]
